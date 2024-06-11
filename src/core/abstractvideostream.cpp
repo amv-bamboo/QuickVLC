@@ -45,8 +45,10 @@ AbstractVideoStream::~AbstractVideoStream()
 
 void AbstractVideoStream::setCallbacks(Vlc::MediaPlayer *player)
 {
-    libvlc_video_set_output_callbacks(player->core(), videoEngine(), setup_cb, cleanup_cb, nullptr, update_output_cb, swap_cb,
-        make_current_cb, get_proc_address_cb, nullptr, select_plane_cb, this);
+    if (videoEngine() != 0) {
+        libvlc_video_set_output_callbacks(player->core(), videoEngine(), setup_cb, cleanup_cb, nullptr,
+            update_output_cb, swap_cb, make_current_cb, get_proc_address_cb, nullptr, select_plane_cb, this);
+    }
 }
 
 void AbstractVideoStream::unsetCallbacks(Vlc::MediaPlayer *player)

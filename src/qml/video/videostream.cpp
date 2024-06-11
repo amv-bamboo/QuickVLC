@@ -33,16 +33,18 @@ VideoStream::VideoStream(QQuickItem *parent) : QObject(parent)
         m_videostream = std::make_unique<Vlc::D3D11VideoStream>();
     } else
 #endif
-        if (QQuickWindow::graphicsApi() == QSGRendererInterface::OpenGLRhi) {
+    if (QQuickWindow::graphicsApi() == QSGRendererInterface::OpenGLRhi) {
         m_videostream = std::make_unique<Vlc::OpenGLVideoStream>();
     } else {
-        assert(false);
+        qInfo() << "videostream: cannot initialize opengl videostream";
     }
 
     qInfo() << "videostream: Using GraphicsAPI: " << QQuickWindow::graphicsApi();
 
-    connect(m_videostream.get(), &Vlc::AbstractVideoStream::frameUpdated, this, &VideoStream::frameUpdated,
-        Qt::QueuedConnection);
+    if (m_videostream != nullptr) {
+        connect(m_videostream.get(), &Vlc::AbstractVideoStream::frameUpdated, this, &VideoStream::frameUpdated,
+            Qt::QueuedConnection);
+    }
 }
 
 VideoStream::~VideoStream()
@@ -53,22 +55,30 @@ void VideoStream::init(Vlc::MediaPlayer *player)
 {
     m_player = player;
 
-    m_videostream->setCallbacks(player);
+    if (m_videostream != nullptr) {
+        m_videostream->setCallbacks(player);
+    }
 }
 
 void VideoStream::initContext()
 {
-    m_videostream->initContext();
+    if (m_videostream != nullptr) {
+        m_videostream->initContext();
+    }
 }
 
 void VideoStream::windowChanged(QQuickWindow *window)
 {
-    m_videostream->windowChanged(window);
+    if (m_videostream != nullptr) {
+        m_videostream->windowChanged(window);
+    }
 }
 
 void VideoStream::deinit()
 {
-    m_videostream->unsetCallbacks(m_player);
+    if (m_videostream != nullptr) {
+        m_videostream->unsetCallbacks(m_player);
+    }
 
     m_player = nullptr;
 }
@@ -96,5 +106,9 @@ void VideoStream::frameUpdated()
 
 std::shared_ptr<Vlc::AbstractVideoFrame> VideoStream::getVideoFrame()
 {
-    return m_videostream->getVideoFrame();
+    if (m_videostream != nullptr) {
+        return m_videostream->getVideoFrame();
+    }
+
+    return 0;
 }
