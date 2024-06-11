@@ -77,11 +77,13 @@ AudioOutput *MediaPlayer::audioOutput() const
 
 void MediaPlayer::setAudioOutput(AudioOutput *audioOutput)
 {
-    m_audioOutput = audioOutput;
+    if (audioOutput) {
+        m_audioOutput = audioOutput;
 
-    audioOutput->init(m_player);
+        audioOutput->init(m_player);
 
-    emit audioOutputChanged();
+        emit audioOutputChanged();
+    }
 }
 
 bool MediaPlayer::autoplay() const
@@ -111,7 +113,7 @@ QUrl MediaPlayer::source() const
 
 void MediaPlayer::setSource(const QUrl &url)
 {
-    if (url == source()) {
+    if (url.isEmpty() || url == source()) {
         return;
     }
 
